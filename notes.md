@@ -1,13 +1,29 @@
 # Start:
+### 1. Prerequisites
 
-Step A: Build the images
+* Before starting, ensure you have the following installed:
+
+* Docker and Docker Compose.
+
+* Git (which you clearly have).
+
+* A .env file: The compose files reference env_file: .env. You likely need to create this from a template. Check for a .env.example file in your directory.
+
+```
+cp .env.example .env
+```
+
+### 2. Running in Development (Recommended)
+   The standard docker-compose.yaml is set up for a development workflow with hot-reloading (via Vite).
+
+  Step A: Build the images
 This will take a few minutes as it installs Ruby gems and Node packages.
 
 ```
   docker-compose build
 ```
 
-Step B: Prepare the Database
+  Step B: Prepare the Database
 Since this is a Rails app, you need to create and seed the database.
 
 ```
@@ -17,10 +33,12 @@ docker-compose run --rm rails bundle exec rake db:seed
 
 ```
 
-Step C: Start the services
+  Step C: Start the services
 ```
 docker-compose up
 ```
+
+### 3. Now explore the BrainAssistant23
 
 Access the App: Open http://localhost:3000 in your browser.
 
@@ -39,6 +57,8 @@ Password1!
 ```
 
 If you want to enable account signup, go to http://localhost:3000/super_admin/app_config?config=general then make Enable Account Signup = True
+
+Nevigate to http://localhost:8025 for emails in test mode
 
 # Storage:
 The config/storage.yml file defines several storage services:
