@@ -17,6 +17,7 @@ if resource.custom_attributes.present?
     end
   end
 end
+json.logo_url resource.logo_url
 json.domain @account.domain
 json.features @account.enabled_features
 json.id @account.id

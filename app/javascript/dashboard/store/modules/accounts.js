@@ -17,6 +17,7 @@ const state = {
     isFetching: false,
     isFetchingItem: false,
     isUpdating: false,
+    isUpdatingLogo: false,
     isCheckoutInProcess: false,
     isFetchingLimits: false,
   },
@@ -35,7 +36,6 @@ export const getters = {
     const accountLocale =
       accountId && findRecordById($state, accountId)?.locale;
 
-    // Prefer user locale; fallback to account locale
     const effectiveLocale = userLocale ?? accountLocale;
 
     return effectiveLocale ? getLanguageDirection(effectiveLocale) : false;
@@ -115,6 +115,30 @@ export const actions = {
     } catch (error) {
       commit(types.default.SET_ACCOUNT_UI_FLAG, { isCreating: false });
       throw error;
+    }
+  },
+
+  updateLogo: async ({ commit }, { accountId, logoFile }) => {
+    commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdatingLogo: true });
+    try {
+      const response = await AccountAPI.updateLogo(accountId, logoFile);
+      commit(types.default.EDIT_ACCOUNT, response.data);
+      commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdatingLogo: false });
+    } catch (error) {
+      commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdatingLogo: false });
+      throw new Error(error);
+    }
+  },
+
+  deleteLogo: async ({ commit }, { accountId }) => {
+    commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdatingLogo: true });
+    try {
+      const response = await AccountAPI.deleteLogo(accountId);
+      commit(types.default.EDIT_ACCOUNT, response.data);
+      commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdatingLogo: false });
+    } catch (error) {
+      commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdatingLogo: false });
+      throw new Error(error);
     }
   },
 

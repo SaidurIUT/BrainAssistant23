@@ -44,11 +44,17 @@ class Api::V1::AccountsController < Api::BaseController
   end
 
   def update
-    @account.assign_attributes(account_params.slice(:name, :locale, :domain, :support_email))
+    @account.assign_attributes(account_params.slice(:name, :locale, :domain, :support_email, :logo))
     @account.custom_attributes.merge!(custom_attributes_params)
     @account.settings.merge!(settings_params)
     @account.custom_attributes['onboarding_step'] = 'invite_team' if @account.custom_attributes['onboarding_step'] == 'account_update'
     @account.save!
+  end
+
+  def logo
+    @account.logo.attachment.destroy! if @account.logo.attached?
+    @account.reload
+    render 'api/v1/accounts/show', format: :json
   end
 
   def update_active_at
@@ -60,10 +66,6 @@ class Api::V1::AccountsController < Api::BaseController
   private
 
   def ensure_account_name
-    # ensure that account_name and user_full_name is present
-    # this is becuase the account builder and the models validations are not triggered
-    # this change is to align the behaviour with the v2 accounts controller
-    # since these values are not required directly there
     return if account_params[:account_name].present?
     return if account_params[:user_full_name].present?
 
@@ -84,7 +86,7 @@ class Api::V1::AccountsController < Api::BaseController
   end
 
   def account_params
-    params.permit(:account_name, :email, :name, :password, :locale, :domain, :support_email, :user_full_name)
+    params.permit(:account_name, :email, :name, :password, :locale, :domain, :support_email, :user_full_name, :logo)
   end
 
   def custom_attributes_params

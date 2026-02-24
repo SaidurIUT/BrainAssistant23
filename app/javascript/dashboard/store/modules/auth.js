@@ -1,3 +1,5 @@
+// file : app / javascript / dashboard / store / modules / auth.js;
+
 import types from '../mutation-types';
 import authAPI from '../../api/auth';
 

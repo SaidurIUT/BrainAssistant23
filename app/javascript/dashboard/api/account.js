@@ -16,6 +16,16 @@ class AccountAPI extends ApiClient {
     );
     return response.data.cache_keys;
   }
+
+  updateLogo(accountId, logoFile) {
+    const formData = new FormData();
+    formData.append('logo', logoFile);
+    return axios.patch(`${this.apiVersion}/accounts/${accountId}`, formData);
+  }
+
+  deleteLogo(accountId) {
+    return axios.delete(`${this.apiVersion}/accounts/${accountId}/logo`);
+  }
 }
 
 export default new AccountAPI();

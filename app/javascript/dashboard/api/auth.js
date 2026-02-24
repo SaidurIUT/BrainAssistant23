@@ -1,4 +1,5 @@
 /* global axios */
+// File: app / javascript / dashboard / api / auth.j;
 
 import Cookies from 'js-cookie';
 import endPoints from './endPoints';

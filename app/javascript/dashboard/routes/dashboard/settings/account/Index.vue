@@ -16,6 +16,7 @@ import BuildInfo from './components/BuildInfo.vue';
 import AccountDelete from './components/AccountDelete.vue';
 import AudioTranscription from './components/AudioTranscription.vue';
 import SectionLayout from './components/SectionLayout.vue';
+import AccountLogo from './components/AccountLogo.vue';
 
 export default {
   components: {
@@ -28,6 +29,7 @@ export default {
     SectionLayout,
     WithLabel,
     NextInput,
+    AccountLogo,
   },
   setup() {
     const { updateUISettings, uiSettings } = useUISettings();
@@ -128,11 +130,9 @@ export default {
           domain: this.domain,
           support_email: this.supportEmail,
         });
-        // If user locale is set, update the locale with user locale
         if (this.uiSettings?.locale) {
           this.$root.$i18n.locale = this.uiSettings?.locale;
         } else {
-          // If user locale is not set, update the locale with account locale
           this.$root.$i18n.locale = this.locale;
         }
         this.getAccount(this.id).locale = this.locale;
@@ -153,80 +153,80 @@ export default {
         :title="$t('GENERAL_SETTINGS.FORM.GENERAL_SECTION.TITLE')"
         :description="$t('GENERAL_SETTINGS.FORM.GENERAL_SECTION.NOTE')"
       >
-        <form
-          v-if="!uiFlags.isFetchingItem"
-          class="grid gap-4"
-          @submit.prevent="updateAccount"
-        >
-          <WithLabel
-            :has-error="v$.name.$error"
-            :label="$t('GENERAL_SETTINGS.FORM.NAME.LABEL')"
-            :error-message="$t('GENERAL_SETTINGS.FORM.NAME.ERROR')"
-          >
-            <NextInput
-              v-model="name"
-              type="text"
-              class="w-full"
-              :placeholder="$t('GENERAL_SETTINGS.FORM.NAME.PLACEHOLDER')"
-              @blur="v$.name.$touch"
-            />
-          </WithLabel>
-          <WithLabel
-            :has-error="v$.locale.$error"
-            :label="$t('GENERAL_SETTINGS.FORM.LANGUAGE.LABEL')"
-            :error-message="$t('GENERAL_SETTINGS.FORM.LANGUAGE.ERROR')"
-          >
-            <select v-model="locale" class="!mb-0 text-sm">
-              <option
-                v-for="lang in languagesSortedByCode"
-                :key="lang.iso_639_1_code"
-                :value="lang.iso_639_1_code"
-              >
-                {{ lang.name }}
-              </option>
-            </select>
-          </WithLabel>
-          <WithLabel
-            v-if="featureCustomReplyDomainEnabled"
-            :label="$t('GENERAL_SETTINGS.FORM.DOMAIN.LABEL')"
-          >
-            <NextInput
-              v-model="domain"
-              type="text"
-              class="w-full"
-              :placeholder="$t('GENERAL_SETTINGS.FORM.DOMAIN.PLACEHOLDER')"
-            />
-            <template #help>
-              {{
-                featureInboundEmailEnabled &&
-                $t('GENERAL_SETTINGS.FORM.FEATURES.INBOUND_EMAIL_ENABLED')
-              }}
-
-              {{
-                featureCustomReplyDomainEnabled &&
-                $t('GENERAL_SETTINGS.FORM.FEATURES.CUSTOM_EMAIL_DOMAIN_ENABLED')
-              }}
-            </template>
-          </WithLabel>
-          <WithLabel
-            v-if="featureCustomReplyEmailEnabled"
-            :label="$t('GENERAL_SETTINGS.FORM.SUPPORT_EMAIL.LABEL')"
-          >
-            <NextInput
-              v-model="supportEmail"
-              type="text"
-              class="w-full"
-              :placeholder="
-                $t('GENERAL_SETTINGS.FORM.SUPPORT_EMAIL.PLACEHOLDER')
-              "
-            />
-          </WithLabel>
-          <div>
-            <NextButton blue :is-loading="isUpdating" type="submit">
-              {{ $t('GENERAL_SETTINGS.SUBMIT') }}
-            </NextButton>
-          </div>
-        </form>
+        <div v-if="!uiFlags.isFetchingItem" class="grid gap-4">
+          <AccountLogo />
+          <form class="grid gap-4" @submit.prevent="updateAccount">
+            <WithLabel
+              :has-error="v$.name.$error"
+              :label="$t('GENERAL_SETTINGS.FORM.NAME.LABEL')"
+              :error-message="$t('GENERAL_SETTINGS.FORM.NAME.ERROR')"
+            >
+              <NextInput
+                v-model="name"
+                type="text"
+                class="w-full"
+                :placeholder="$t('GENERAL_SETTINGS.FORM.NAME.PLACEHOLDER')"
+                @blur="v$.name.$touch"
+              />
+            </WithLabel>
+            <WithLabel
+              :has-error="v$.locale.$error"
+              :label="$t('GENERAL_SETTINGS.FORM.LANGUAGE.LABEL')"
+              :error-message="$t('GENERAL_SETTINGS.FORM.LANGUAGE.ERROR')"
+            >
+              <select v-model="locale" class="!mb-0 text-sm">
+                <option
+                  v-for="lang in languagesSortedByCode"
+                  :key="lang.iso_639_1_code"
+                  :value="lang.iso_639_1_code"
+                >
+                  {{ lang.name }}
+                </option>
+              </select>
+            </WithLabel>
+            <WithLabel
+              v-if="featureCustomReplyDomainEnabled"
+              :label="$t('GENERAL_SETTINGS.FORM.DOMAIN.LABEL')"
+            >
+              <NextInput
+                v-model="domain"
+                type="text"
+                class="w-full"
+                :placeholder="$t('GENERAL_SETTINGS.FORM.DOMAIN.PLACEHOLDER')"
+              />
+              <template #help>
+                {{
+                  featureInboundEmailEnabled &&
+                  $t('GENERAL_SETTINGS.FORM.FEATURES.INBOUND_EMAIL_ENABLED')
+                }}
+                {{
+                  featureCustomReplyDomainEnabled &&
+                  $t(
+                    'GENERAL_SETTINGS.FORM.FEATURES.CUSTOM_EMAIL_DOMAIN_ENABLED'
+                  )
+                }}
+              </template>
+            </WithLabel>
+            <WithLabel
+              v-if="featureCustomReplyEmailEnabled"
+              :label="$t('GENERAL_SETTINGS.FORM.SUPPORT_EMAIL.LABEL')"
+            >
+              <NextInput
+                v-model="supportEmail"
+                type="text"
+                class="w-full"
+                :placeholder="
+                  $t('GENERAL_SETTINGS.FORM.SUPPORT_EMAIL.PLACEHOLDER')
+                "
+              />
+            </WithLabel>
+            <div>
+              <NextButton blue :is-loading="isUpdating" type="submit">
+                {{ $t('GENERAL_SETTINGS.SUBMIT') }}
+              </NextButton>
+            </div>
+          </form>
+        </div>
       </SectionLayout>
 
       <woot-loading-state v-if="uiFlags.isFetchingItem" />

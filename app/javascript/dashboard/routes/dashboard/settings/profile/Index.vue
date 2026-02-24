@@ -1,3 +1,5 @@
+<!--app/javascript/dashboard/components-next/avatar/Avatar.vue-->
+
 <script>
 import { mapGetters } from 'vuex';
 import { useAlert } from 'dashboard/composables';

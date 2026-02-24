@@ -14,6 +14,14 @@
       "ERROR": "Could not update settings, try again!",
       "SUCCESS": "Successfully updated account settings"
     },
+    "ACCOUNT_LOGO": {
+      "LABEL": "Account Logo",
+      "UPDATING": "Updating...",
+      "UPDATE_SUCCESS": "Account logo updated successfully",
+      "UPDATE_ERROR": "Could not update account logo, try again!",
+      "DELETE_SUCCESS": "Account logo deleted successfully",
+      "DELETE_ERROR": "Could not delete account logo, try again!"
+    },
     "ACCOUNT_DELETE_SECTION": {
       "TITLE": "Delete your Account",
       "NOTE": "Once you delete your account, all your data will be deleted.",

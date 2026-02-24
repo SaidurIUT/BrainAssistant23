@@ -1,3 +1,5 @@
+<!--File:app/javascript/dashboard/routes/dashboard/settings/account/components/SectionLayout.vue-->
+
 <script setup>
 import { useI18n } from 'vue-i18n';
 

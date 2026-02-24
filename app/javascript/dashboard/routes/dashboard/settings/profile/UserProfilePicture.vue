@@ -1,3 +1,5 @@
+<!--app/javascript/dashboard/routes/dashboard/settings/profile/UserProfilePicture.vue-->
+
 <script setup>
 import Avatar from 'dashboard/components-next/avatar/Avatar.vue';
 defineProps({
