@@ -1,3 +1,5 @@
+<!--app/javascript/dashboard/components-next/avatar/Avatar.vue-->
+
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';

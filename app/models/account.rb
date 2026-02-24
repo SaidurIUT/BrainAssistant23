@@ -23,13 +23,13 @@
 #
 
 class Account < ApplicationRecord
-  # used for single column multi flags
   include FlagShihTzu
   include Reportable
   include Featurable
   include CacheKeys
   include CaptainFeaturable
   include AccountEmailRateLimitable
+  include Rails.application.routes.url_helpers
 
   SETTINGS_PARAMS_SCHEMA = {
     'type': 'object',
@@ -84,6 +84,7 @@ class Account < ApplicationRecord
   validates_with JsonSchemaValidator,
                  schema: SETTINGS_PARAMS_SCHEMA,
                  attribute_resolver: ->(record) { record.settings }
+  validate :acceptable_logo, if: -> { logo.changed? }
 
   store_accessor :settings, :auto_resolve_after, :auto_resolve_message, :auto_resolve_ignore_waiting
 
@@ -135,6 +136,7 @@ class Account < ApplicationRecord
   has_many :working_hours, dependent: :destroy_async
 
   has_one_attached :contacts_export
+  has_one_attached :logo
 
   enum :locale, LANGUAGES_CONFIG.map { |key, val| [val[:iso_639_1_code], key] }.to_h, prefix: true
   enum :status, { active: 0, suspended: 1 }
@@ -154,7 +156,6 @@ class Account < ApplicationRecord
   end
 
   def all_conversation_tags
-    # returns array of tags
     conversation_ids = conversations.pluck(:id)
     ActsAsTaggableOn::Tagging.includes(:tag)
                              .where(context: 'labels',
@@ -187,11 +188,14 @@ class Account < ApplicationRecord
   end
 
   def locale_english_name
-    # the locale can also be something like pt_BR, en_US, fr_FR, etc.
-    # the format is `<locale_code>_<country_code>`
-    # we need to extract the language code from the locale
     account_locale = locale&.split('_')&.first
     ISO_639.find(account_locale)&.english_name&.downcase || 'english'
+  end
+
+  def logo_url
+    return url_for(logo.representation(resize_to_fill: [250, nil])) if logo.attached? && logo.representable?
+
+    ''
   end
 
   private
@@ -209,12 +213,20 @@ class Account < ApplicationRecord
   end
 
   def validate_limit_keys
-    # method overridden in enterprise module
   end
 
   def remove_account_sequences
     ActiveRecord::Base.connection.exec_query("drop sequence IF EXISTS camp_dpid_seq_#{id}")
     ActiveRecord::Base.connection.exec_query("drop sequence IF EXISTS conv_dpid_seq_#{id}")
+  end
+
+  def acceptable_logo
+    return unless logo.attached?
+
+    errors.add(:logo, 'is too big') if logo.byte_size > 15.megabytes
+
+    acceptable_types = ['image/jpeg', 'image/png', 'image/gif'].freeze
+    errors.add(:logo, 'filetype not supported') unless acceptable_types.include?(logo.content_type)
   end
 end
 
