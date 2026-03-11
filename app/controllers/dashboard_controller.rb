@@ -29,6 +29,7 @@ class DashboardController < ActionController::Base
   before_action :set_application_pack
   before_action :set_global_config
   before_action :set_dashboard_scripts
+  before_action :set_current_account
   around_action :switch_locale
   before_action :ensure_installation_onboarding, only: [:index]
   before_action :render_hc_if_custom_domain, only: [:index]
@@ -38,6 +39,13 @@ class DashboardController < ActionController::Base
   def index; end
 
   private
+
+  def set_current_account
+    # Extract account_id from URL like /app/accounts/3/dashboard
+    match = request.path.match(%r{/app/accounts/(\d+)})
+    account_id = match[1] if match
+    @current_account = Account.find_by(id: account_id) if account_id
+  end
 
   def ensure_html_format
     render json: { error: 'Please use API routes instead of dashboard routes for JSON requests' }, status: :not_acceptable if request.format.json?

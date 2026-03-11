@@ -138,6 +138,14 @@ class Account < ApplicationRecord
   has_one_attached :contacts_export
   has_one_attached :logo
 
+  # PWA icons — one per size
+  has_one_attached :pwa_icon_36
+  has_one_attached :pwa_icon_48
+  has_one_attached :pwa_icon_72
+  has_one_attached :pwa_icon_96
+  has_one_attached :pwa_icon_144
+  has_one_attached :pwa_icon_192
+
   enum :locale, LANGUAGES_CONFIG.map { |key, val| [val[:iso_639_1_code], key] }.to_h, prefix: true
   enum :status, { active: 0, suspended: 1 }
 
@@ -228,6 +236,7 @@ class Account < ApplicationRecord
     acceptable_types = ['image/jpeg', 'image/png', 'image/gif'].freeze
     errors.add(:logo, 'filetype not supported') unless acceptable_types.include?(logo.content_type)
   end
+
 end
 
 Account.prepend_mod_with('Account')
