@@ -13,7 +13,6 @@ Rails.application.routes.draw do
     root to: 'api#index'
   else
     root to: 'dashboard#index'
-
     get '/app', to: 'dashboard#index'
     get '/app/*params', to: 'dashboard#index'
     get '/app/accounts/:account_id/settings/inboxes/new/twitter', to: 'dashboard#index', as: 'app_new_twitter_inbox'
@@ -596,6 +595,9 @@ Rails.application.routes.draw do
   get 'tiktok/callback', to: 'tiktok/callbacks#show'
   get 'notion/callback', to: 'notion/callbacks#show'
   # ----------------------------------------------------------------------
+  # Dynamic PWA manifest per account
+  get '/manifest/:account_id.json', to: 'manifest#show', as: :account_manifest
+
   # Routes for external service verifications
   get '.well-known/assetlinks.json' => 'android_app#assetlinks'
   get '.well-known/apple-app-site-association' => 'apple_app#site_association'

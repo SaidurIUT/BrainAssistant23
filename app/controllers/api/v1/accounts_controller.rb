@@ -49,6 +49,7 @@ class Api::V1::AccountsController < Api::BaseController
     @account.settings.merge!(settings_params)
     @account.custom_attributes['onboarding_step'] = 'invite_team' if @account.custom_attributes['onboarding_step'] == 'account_update'
     @account.save!
+    PwaIconGeneratorJob.perform_later(@account.id) if params[:logo].present? && @account.logo.attached?
   end
 
   def logo
