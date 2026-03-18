@@ -20,7 +20,8 @@ cp .env.example .env
 This will take a few minutes as it installs Ruby gems and Node packages.
 
 ```
-  docker-compose build
+docker-compose build base
+docker-compose build rails vite
 ```
 
   Step B: Prepare the Database
