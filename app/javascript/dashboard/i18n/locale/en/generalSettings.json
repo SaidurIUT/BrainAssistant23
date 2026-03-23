@@ -76,7 +76,7 @@
           "PLACEHOLDER": "Select a label"
         },
         "IGNORE_WAITING": {
-          "LABEL": "Skip conversations waiting for agent’s reply"
+          "LABEL": "Skip conversations waiting for agent's reply"
         },
         "UPDATE_BUTTON": "Save Changes"
       },
@@ -137,6 +137,51 @@
     "UPGRADE": "Upgrade to continue using Chatwoot",
     "LIMITS_UPGRADE": "Your account has exceeded the usage limits, please upgrade your plan to continue using Chatwoot",
     "OPEN_BILLING": "Open billing"
+  },
+  "KNOWLEDGE_BASE": {
+    "TITLE": "Knowledge Base",
+    "WEBSITE_URL": {
+      "SECTION_TITLE": "Website",
+      "SECTION_NOTE": "Add your website URL to scrape content for your knowledge base.",
+      "LABEL": "Website URL",
+      "PLACEHOLDER": "https://yourwebsite.com",
+      "SAVE": "Save",
+      "SAVE_SUCCESS": "Website URL saved successfully",
+      "SAVE_ERROR": "Could not save website URL, try again!"
+    },
+    "SCRAPED_DATA": {
+      "SECTION_TITLE": "Scraped Content",
+      "SECTION_NOTE": "Content scraped from your website will appear here.",
+      "EMPTY": "No scraped content yet. Save a website URL to get started.",
+      "HELPER": "This content is read-only and is populated automatically after scraping."
+    },
+    "ENTRIES": {
+      "SECTION_TITLE": "Additional Data",
+      "SECTION_NOTE": "Add custom knowledge entries with a level and description. You can add as many entries as you need.",
+      "EMPTY": "No entries yet. Click the button below to add your first entry.",
+      "ADD_BUTTON": "Add Entry"
+    },
+    "ENTRY": {
+      "LEVEL": {
+        "LABEL": "Level",
+        "PLACEHOLDER": "e.g. Beginner, Advanced, FAQ, Policy..."
+      },
+      "DESCRIPTION": {
+        "LABEL": "Description",
+        "PLACEHOLDER": "Enter the knowledge content for this entry..."
+      },
+      "ADD": "Add Entry",
+      "UPDATE": "Update Entry",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "CANCEL": "Cancel",
+      "CREATE_SUCCESS": "Entry added successfully",
+      "CREATE_ERROR": "Could not add entry, try again!",
+      "UPDATE_SUCCESS": "Entry updated successfully",
+      "UPDATE_ERROR": "Could not update entry, try again!",
+      "DELETE_SUCCESS": "Entry deleted successfully",
+      "DELETE_ERROR": "Could not delete entry, try again!"
+    }
   },
   "FORMS": {
     "MULTISELECT": {

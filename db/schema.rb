@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_30_061021) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_18_154030) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -905,6 +905,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_30_061021) do
     t.jsonb "settings", default: {}
   end
 
+  create_table "knowledge_base_entries", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "level", null: false
+    t.text "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_knowledge_base_entries_on_account_id"
+  end
+
   create_table "labels", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -1272,6 +1281,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_30_061021) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "knowledge_base_entries", "accounts"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).

@@ -586,6 +586,13 @@ const menuItems = computed(() => {
         //   to: accountScopedRoute('captain_settings_index'),
         // },
         {
+          name: 'Settings Knowledge Base',
+          label: t('SIDEBAR.KNOWLEDGE_BASE'),
+          icon: 'i-lucide-database',
+          to: accountScopedRoute('knowledge_base_index'),
+        },
+
+        {
           name: 'Settings Agents',
           label: t('SIDEBAR.AGENTS'),
           icon: 'i-lucide-square-user',

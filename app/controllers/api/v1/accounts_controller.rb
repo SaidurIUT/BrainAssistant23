@@ -44,7 +44,7 @@ class Api::V1::AccountsController < Api::BaseController
   end
 
   def update
-    @account.assign_attributes(account_params.slice(:name, :locale, :domain, :support_email, :logo))
+    @account.assign_attributes(account_params.slice(:name, :locale, :domain, :support_email, :logo, :website_url, :scraped_data))
     @account.custom_attributes.merge!(custom_attributes_params)
     @account.settings.merge!(settings_params)
     @account.custom_attributes['onboarding_step'] = 'invite_team' if @account.custom_attributes['onboarding_step'] == 'account_update'
@@ -87,7 +87,7 @@ class Api::V1::AccountsController < Api::BaseController
   end
 
   def account_params
-    params.permit(:account_name, :email, :name, :password, :locale, :domain, :support_email, :user_full_name, :logo)
+    params.permit(:account_name, :email, :name, :password, :locale, :domain, :support_email, :user_full_name, :logo, :website_url, :scraped_data)
   end
 
   def custom_attributes_params

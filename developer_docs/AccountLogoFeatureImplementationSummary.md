@@ -89,7 +89,9 @@ end
 ### `app/views/api/v1/models/_account.json.jbuilder`
 
 ```ruby
-json.logo_url resource.logo_url    # NEW — added near other top-level fields
+json.logo_url resource.logo_url
+json.website_url resource.website_url
+json.scraped_data resource.scraped_data
 json.domain @account.domain
 # ...
 ```
