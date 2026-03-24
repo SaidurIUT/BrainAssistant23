@@ -45,6 +45,8 @@ Rails.application.routes.draw do
           post :update_active_at
           get :cache_keys
           delete :logo
+          post :scrape
+          get  :scrape_status
         end
 
         scope module: :accounts do

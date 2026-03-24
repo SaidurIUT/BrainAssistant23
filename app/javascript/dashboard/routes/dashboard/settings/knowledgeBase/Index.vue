@@ -1,3 +1,5 @@
+<!--File: app/javascript/dashboard/routes/dashboard/settings/knowledgeBase/Index.vue-->
+
 <script>
 import { mapGetters } from 'vuex';
 import { useAlert } from 'dashboard/composables';
@@ -37,15 +39,64 @@ export default {
     ...mapGetters({
       getAccount: 'accounts/getAccount',
       accountUIFlags: 'accounts/getUIFlags',
+      scrapeJob: 'accounts/getScrapeJob', // { status, message }
     }),
+
     entries() {
       return this.$store.getters['knowledgeBaseEntries/getEntries'];
     },
+
     kbUIFlags() {
       return this.$store.getters['knowledgeBaseEntries/getUIFlags'];
     },
+
     currentAccount() {
       return this.getAccount(this.accountId) || {};
+    },
+
+    // Show the Scrape button only when a URL has been saved on the account.
+    // This intentionally checks the stored account value, not the local input,
+    // so the button only appears after a successful Save.
+    hasSavedWebsiteUrl() {
+      return !!this.currentAccount.website_url;
+    },
+
+    // True while the job is in a transient state
+    isScraping() {
+      return ['pending', 'running'].includes(this.scrapeJob?.status);
+    },
+
+    // Used to drive the status banner colour and icon
+    scrapeStatusType() {
+      const s = this.scrapeJob?.status;
+      if (s === 'done') return 'success';
+      if (s === 'failed') return 'error';
+      return 'info';
+    },
+
+    // Human-readable status line shown in the banner
+    scrapeStatusText() {
+      const s = this.scrapeJob?.status;
+      if (!s || s === 'idle') return '';
+
+      // For running/pending, prefer the live message from the worker
+      if (s === 'pending')
+        return this.$t('KNOWLEDGE_BASE.WEBSITE_URL.SCRAPE_STATUS.PENDING');
+      if (s === 'running') {
+        return (
+          this.scrapeJob.message ||
+          this.$t('KNOWLEDGE_BASE.WEBSITE_URL.SCRAPE_STATUS.RUNNING')
+        );
+      }
+      if (s === 'done')
+        return this.$t('KNOWLEDGE_BASE.WEBSITE_URL.SCRAPE_STATUS.DONE');
+      if (s === 'failed') {
+        return (
+          this.scrapeJob.message ||
+          this.$t('KNOWLEDGE_BASE.WEBSITE_URL.SCRAPE_STATUS.FAILED')
+        );
+      }
+      return '';
     },
   },
 
@@ -60,7 +111,16 @@ export default {
         this.websiteUrl = account?.website_url || '';
         this.scrapedData = account?.scraped_data || '';
         await this.$store.dispatch('knowledgeBaseEntries/fetchEntries');
-      } catch (error) {
+
+        // If a scrape was already running when the user navigated here,
+        // resume polling so the UI stays in sync.
+        const existingStatus = this.scrapeJob?.status;
+        if (['pending', 'running'].includes(existingStatus)) {
+          this.$store.dispatch('accounts/pollScrapeStatus', {
+            accountId: this.accountId,
+          });
+        }
+      } catch {
         // Ignore
       }
     },
@@ -73,6 +133,19 @@ export default {
         useAlert(this.$t('KNOWLEDGE_BASE.WEBSITE_URL.SAVE_SUCCESS'));
       } catch {
         useAlert(this.$t('KNOWLEDGE_BASE.WEBSITE_URL.SAVE_ERROR'));
+      }
+    },
+
+    async triggerScrape() {
+      try {
+        await this.$store.dispatch('accounts/triggerScrape', {
+          accountId: this.accountId,
+        });
+        // polling is started inside the action — nothing else to do here
+      } catch {
+        useAlert(
+          this.$t('KNOWLEDGE_BASE.WEBSITE_URL.SCRAPE_STATUS.TRIGGER_ERROR')
+        );
       }
     },
 
@@ -129,13 +202,14 @@ export default {
     <BaseSettingsHeader :title="$t('KNOWLEDGE_BASE.TITLE')" />
 
     <div class="flex-grow flex-shrink min-w-0 mt-3 flex flex-col gap-4">
-      <!-- Website URL Section -->
+      <!-- ── Website URL Section ──────────────────────────────────────────── -->
       <SectionLayout
         :title="$t('KNOWLEDGE_BASE.WEBSITE_URL.SECTION_TITLE')"
         :description="$t('KNOWLEDGE_BASE.WEBSITE_URL.SECTION_NOTE')"
       >
         <div class="grid gap-4">
           <WithLabel :label="$t('KNOWLEDGE_BASE.WEBSITE_URL.LABEL')">
+            <!-- URL input + Save button -->
             <div class="flex gap-2">
               <NextInput
                 v-model="websiteUrl"
@@ -151,11 +225,61 @@ export default {
                 {{ $t('KNOWLEDGE_BASE.WEBSITE_URL.SAVE') }}
               </NextButton>
             </div>
+
+            <!-- Scrape Data button — only visible once a URL has been saved -->
+            <div v-if="hasSavedWebsiteUrl" class="mt-2">
+              <NextButton
+                blue
+                :is-loading="isScraping || accountUIFlags.isScraping"
+                :disabled="isScraping || accountUIFlags.isScraping"
+                @click="triggerScrape"
+              >
+                {{
+                  isScraping
+                    ? $t('KNOWLEDGE_BASE.WEBSITE_URL.SCRAPE_BUTTON_LOADING')
+                    : $t('KNOWLEDGE_BASE.WEBSITE_URL.SCRAPE_BUTTON')
+                }}
+              </NextButton>
+            </div>
           </WithLabel>
+
+          <!-- ── Live status banner ───────────────────────────────────────── -->
+          <!--
+            Shown whenever a scrape job exists and is not idle.
+            Colour coding:
+              info    → pending / running  (blue-ish)
+              success → done               (green)
+              error   → failed             (red)
+          -->
+          <div
+            v-if="scrapeJob && scrapeJob.status !== 'idle' && scrapeStatusText"
+            class="flex items-start gap-2 rounded-lg px-4 py-3 text-sm"
+            :class="{
+              'bg-blue-50  text-blue-800  dark:bg-blue-900/30  dark:text-blue-300':
+                scrapeStatusType === 'info',
+              'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300':
+                scrapeStatusType === 'success',
+              'bg-red-50   text-red-800   dark:bg-red-900/30   dark:text-red-300':
+                scrapeStatusType === 'error',
+            }"
+          >
+            <!-- Spinning indicator while running -->
+            <span
+              v-if="isScraping"
+              class="mt-0.5 h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+            />
+            <!-- Static dot when finished -->
+            <span
+              v-else
+              class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-current"
+            />
+
+            <span>{{ scrapeStatusText }}</span>
+          </div>
         </div>
       </SectionLayout>
 
-      <!-- Scraped Data Section -->
+      <!-- ── Scraped Data Section ─────────────────────────────────────────── -->
       <SectionLayout
         :title="$t('KNOWLEDGE_BASE.SCRAPED_DATA.SECTION_TITLE')"
         :description="$t('KNOWLEDGE_BASE.SCRAPED_DATA.SECTION_NOTE')"
@@ -173,23 +297,21 @@ export default {
         </div>
       </SectionLayout>
 
-      <!-- Additional Data Entries Section -->
+      <!-- ── Additional Data Entries Section ─────────────────────────────── -->
       <SectionLayout
         :title="$t('KNOWLEDGE_BASE.ENTRIES.SECTION_TITLE')"
         :description="$t('KNOWLEDGE_BASE.ENTRIES.SECTION_NOTE')"
       >
         <div class="flex flex-col gap-3">
-          <!-- Loading state -->
           <woot-loading-state v-if="kbUIFlags.isFetching" />
 
-          <!-- Entries list -->
           <template v-else>
             <div
               v-for="entry in entries"
               :key="entry.id"
               class="flex flex-col gap-2"
             >
-              <!-- Edit form inline -->
+              <!-- Inline edit form -->
               <KnowledgeBaseEntryForm
                 v-if="editingEntry && editingEntry.id === entry.id"
                 :entry="editingEntry"
@@ -231,7 +353,6 @@ export default {
               </div>
             </div>
 
-            <!-- Empty state -->
             <p
               v-if="!entries.length && !showAddForm"
               class="text-sm text-n-slate-9 text-center py-4"
@@ -239,7 +360,6 @@ export default {
               {{ $t('KNOWLEDGE_BASE.ENTRIES.EMPTY') }}
             </p>
 
-            <!-- Add form -->
             <KnowledgeBaseEntryForm
               v-if="showAddForm"
               :is-loading="kbUIFlags.isCreating"
@@ -247,7 +367,6 @@ export default {
               @cancel="cancelAdd"
             />
 
-            <!-- Add button -->
             <div v-if="!showAddForm">
               <NextButton blue icon="add" @click="showAddForm = true">
                 {{ $t('KNOWLEDGE_BASE.ENTRIES.ADD_BUTTON') }}

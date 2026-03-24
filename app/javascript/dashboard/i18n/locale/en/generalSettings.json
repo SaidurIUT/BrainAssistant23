@@ -147,7 +147,16 @@
       "PLACEHOLDER": "https://yourwebsite.com",
       "SAVE": "Save",
       "SAVE_SUCCESS": "Website URL saved successfully",
-      "SAVE_ERROR": "Could not save website URL, try again!"
+      "SAVE_ERROR": "Could not save website URL, try again!",
+      "SCRAPE_BUTTON": "Scrape Data",
+      "SCRAPE_BUTTON_LOADING": "Scraping…",
+      "SCRAPE_STATUS": {
+        "PENDING": "Scrape job accepted — starting up…",
+        "RUNNING": "Scraping in progress…",
+        "DONE": "Scraping complete! New entries have been added below.",
+        "FAILED": "Scraping failed",
+        "TRIGGER_ERROR": "Could not start scrape job, try again!"
+      }
     },
     "SCRAPED_DATA": {
       "SECTION_TITLE": "Scraped Content",

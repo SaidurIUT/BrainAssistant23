@@ -1,3 +1,5 @@
+// File: app/javascript/dashboard/store/modules/accounts.js
+
 import * as MutationHelpers from 'shared/helpers/vuex/mutationHelpers';
 import * as types from '../mutation-types';
 import AccountAPI from '../../api/account';
@@ -20,6 +22,11 @@ const state = {
     isUpdatingLogo: false,
     isCheckoutInProcess: false,
     isFetchingLimits: false,
+    isScraping: false,
+  },
+  scrapeJob: {
+    status: 'idle',
+    message: '',
   },
 };
 
@@ -51,6 +58,7 @@ export const getters = {
     const { features = {} } = findRecordById($state, id);
     return features[featureName] || false;
   },
+  getScrapeJob: $state => $state.scrapeJob,
 };
 
 export const actions = {
@@ -180,6 +188,49 @@ export const actions = {
   getCacheKeys: async () => {
     return AccountAPI.getCacheKeys();
   },
+  triggerScrape: async ({ commit, dispatch }, { accountId }) => {
+    commit(types.default.SET_ACCOUNT_UI_FLAG, { isScraping: true });
+    try {
+      await AccountAPI.triggerScrape(accountId);
+      // Immediately start polling so the UI reacts without waiting
+      dispatch('pollScrapeStatus', { accountId });
+    } finally {
+      commit(types.default.SET_ACCOUNT_UI_FLAG, { isScraping: false });
+    }
+  },
+  pollScrapeStatus: async ({ commit, dispatch }, { accountId }) => {
+    const INTERVAL_MS = 3000;
+
+    const poll = async () => {
+      try {
+        const response = await AccountAPI.scrapeStatus(accountId);
+        const { status, message } = response.data;
+
+        commit(types.default.SET_SCRAPE_JOB, { status, message });
+
+        if (status === 'done') {
+          // Refresh entries so the new rows appear automatically
+          dispatch('knowledgeBaseEntries/fetchEntries', null, { root: true });
+          return; // stop polling
+        }
+
+        if (status === 'failed') {
+          return; // stop polling, error message already in state
+        }
+
+        // Still pending/running — check again after the interval
+        setTimeout(poll, INTERVAL_MS);
+      } catch {
+        // Network error — stop polling, leave status as-is
+        commit(types.default.SET_SCRAPE_JOB, {
+          status: 'failed',
+          message: 'Lost connection to scraper service.',
+        });
+      }
+    };
+
+    poll();
+  },
 };
 
 export const mutations = {
@@ -192,6 +243,9 @@ export const mutations = {
   [types.default.ADD_ACCOUNT]: MutationHelpers.setSingleRecord,
   [types.default.EDIT_ACCOUNT]: MutationHelpers.update,
   [types.default.SET_ACCOUNT_LIMITS]: MutationHelpers.updateAttributes,
+  [types.default.SET_SCRAPE_JOB]($state, data) {
+    $state.scrapeJob = { ...$state.scrapeJob, ...data };
+  },
 };
 
 export default {

@@ -34,4 +34,12 @@ class AccountPolicy < ApplicationPolicy
   def topup_checkout?
     @account_user.administrator?
   end
+
+  def scrape?
+    @account_user.administrator?
+  end
+
+  def scrape_status?
+    @account_user.administrator?
+  end
 end

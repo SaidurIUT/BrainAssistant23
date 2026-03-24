@@ -26,6 +26,14 @@ class AccountAPI extends ApiClient {
   deleteLogo(accountId) {
     return axios.delete(`${this.apiVersion}/accounts/${accountId}/logo`);
   }
+
+  triggerScrape(accountId) {
+    return axios.post(`${this.apiVersion}/accounts/${accountId}/scrape`);
+  }
+
+  scrapeStatus(accountId) {
+    return axios.get(`${this.apiVersion}/accounts/${accountId}/scrape_status`);
+  }
 }
 
 export default new AccountAPI();

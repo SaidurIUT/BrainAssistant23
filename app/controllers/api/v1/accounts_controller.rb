@@ -58,6 +58,62 @@ class Api::V1::AccountsController < Api::BaseController
     render 'api/v1/accounts/show', format: :json
   end
 
+  def scrape
+    unless SCRAPER_SERVICE_URL
+      render json: { error: 'Scraper service is not configured.' }, status: :service_unavailable
+      return
+    end
+
+    unless @account.website_url.present?
+      render json: { error: 'No website URL saved for this account.' }, status: :unprocessable_entity
+      return
+    end
+
+    # The worker will call back into our own API using the current user's token.
+    api_token = current_user.access_token.token
+
+    payload = {
+      account_id:      @account.id,
+      website_url:     @account.website_url,
+      rails_api_url: request.base_url,
+      rails_api_token: api_token
+    }.to_json
+
+    uri  = URI("#{SCRAPER_SERVICE_URL}/scrape")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = uri.scheme == 'https'
+
+    request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
+    request.body = payload
+
+    begin
+      response = http.request(request)
+      render json: JSON.parse(response.body), status: response.code.to_i
+    rescue StandardError => e
+      Rails.logger.error "SCRAPE ERROR: #{e.class} — #{e.message}"
+      Rails.logger.error e.backtrace.first(5).join("\n")
+      render json: { error: "Could not reach scraper service: #{e.message}" }, status: :bad_gateway
+    end
+  end
+
+  def scrape_status
+    unless SCRAPER_SERVICE_URL
+      render json: { error: 'Scraper service is not configured.' }, status: :service_unavailable
+      return
+    end
+
+    uri  = URI("#{SCRAPER_SERVICE_URL}/scrape/#{@account.id}/status")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = uri.scheme == 'https'
+
+    begin
+      response = http.get(uri.path)
+      render json: JSON.parse(response.body), status: response.code.to_i
+    rescue StandardError => e
+      render json: { error: "Could not reach scraper service: #{e.message}" }, status: :bad_gateway
+    end
+  end
+
   def update_active_at
     @current_account_user.active_at = Time.now.utc
     @current_account_user.save!
