@@ -29,7 +29,6 @@ export default {
   data() {
     return {
       websiteUrl: '',
-      scrapedData: '',
       showAddForm: false,
       editingEntry: null,
     };
@@ -109,7 +108,6 @@ export default {
       try {
         const account = this.getAccount(this.accountId);
         this.websiteUrl = account?.website_url || '';
-        this.scrapedData = account?.scraped_data || '';
         await this.$store.dispatch('knowledgeBaseEntries/fetchEntries');
 
         // If a scrape was already running when the user navigated here,
@@ -209,7 +207,7 @@ export default {
       >
         <div class="grid gap-4">
           <WithLabel :label="$t('KNOWLEDGE_BASE.WEBSITE_URL.LABEL')">
-            <!-- URL input + Save button -->
+            <!-- URL input + Save button + scraper button -->
             <div class="flex gap-2">
               <NextInput
                 v-model="websiteUrl"
@@ -224,11 +222,8 @@ export default {
               >
                 {{ $t('KNOWLEDGE_BASE.WEBSITE_URL.SAVE') }}
               </NextButton>
-            </div>
-
-            <!-- Scrape Data button — only visible once a URL has been saved -->
-            <div v-if="hasSavedWebsiteUrl" class="mt-2">
               <NextButton
+                v-if="hasSavedWebsiteUrl"
                 blue
                 :is-loading="isScraping || accountUIFlags.isScraping"
                 :disabled="isScraping || accountUIFlags.isScraping"
@@ -276,24 +271,6 @@ export default {
 
             <span>{{ scrapeStatusText }}</span>
           </div>
-        </div>
-      </SectionLayout>
-
-      <!-- ── Scraped Data Section ─────────────────────────────────────────── -->
-      <SectionLayout
-        :title="$t('KNOWLEDGE_BASE.SCRAPED_DATA.SECTION_TITLE')"
-        :description="$t('KNOWLEDGE_BASE.SCRAPED_DATA.SECTION_NOTE')"
-      >
-        <div class="grid gap-2">
-          <textarea
-            v-model="scrapedData"
-            readonly
-            class="w-full min-h-[200px] text-sm border border-n-slate-5 rounded-lg p-3 resize-y bg-n-slate-2 dark:bg-n-slate-3 text-n-slate-12 placeholder:text-n-slate-9 focus:outline-none cursor-default"
-            :placeholder="$t('KNOWLEDGE_BASE.SCRAPED_DATA.EMPTY')"
-          />
-          <p class="text-xs text-n-slate-10">
-            {{ $t('KNOWLEDGE_BASE.SCRAPED_DATA.HELPER') }}
-          </p>
         </div>
       </SectionLayout>
 

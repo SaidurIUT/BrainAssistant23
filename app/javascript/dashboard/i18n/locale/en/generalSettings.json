@@ -165,8 +165,8 @@
       "HELPER": "This content is read-only and is populated automatically after scraping."
     },
     "ENTRIES": {
-      "SECTION_TITLE": "Additional Data",
-      "SECTION_NOTE": "Add custom knowledge entries with a level and description. You can add as many entries as you need.",
+      "SECTION_TITLE": "Knowledge Entries",
+      "SECTION_NOTE": "Scraped pages and custom entries are saved here. You can also add entries manually.",
       "EMPTY": "No entries yet. Click the button below to add your first entry.",
       "ADD_BUTTON": "Add Entry"
     },
