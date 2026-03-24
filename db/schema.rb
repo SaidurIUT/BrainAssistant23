@@ -65,6 +65,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_18_154030) do
     t.datetime "updated_at", precision: nil, null: false
     t.integer "locale", default: 0
     t.string "domain", limit: 100
+    t.string "website_url"
+    t.text "scraped_data"
     t.string "support_email", limit: 100
     t.bigint "feature_flags", default: 0, null: false
     t.integer "auto_resolve_duration"
